@@ -1,0 +1,23 @@
+{
+  "watermarking/__init__.py": "911d20e66e8895fb01a0238a51128a3b467dcd06bb7a93eebbf332c84dc63c92",
+  "watermarking/attacks.py": "6478ae585317eb0c00167e77ebf804bd5e102ebbb4ade80b12cc0db06f729f5d",
+  "watermarking/detection.py": "933c9a3db08c8bd961d8e9394da117f34cdda72fe2f93f4b8822c72442197396",
+  "watermarking/generation.py": "7189c50d781d1fe7125c8329e64b7d943076d6aae2c44fc1c4b969ae508cf644",
+  "watermarking/gumbel/__init__.py": "6e97ed426c4022ae05bf2f5c4ea95655ada37dbec96214c9d4139a726dac17f1",
+  "watermarking/gumbel/gumbel_levenshtein.pyx": "874734a071844818370c3de4429c4150835729a8feb4c63993ea961ba3b39d1d",
+  "watermarking/gumbel/key.py": "1324b2a139c7a305055bbeb41cd1675ff7071d38208e693b4194dd660a8fb926",
+  "watermarking/gumbel/sampler.py": "e6c405a220a819ebaf038aa5c898569f7ae1dc49f00a7b82ea785bfce8aa52d9",
+  "watermarking/gumbel/score.py": "9672339f2695b9dc46c6849aaa5f9d42f6e119141b577dd60d19cd1e871782dc",
+  "watermarking/kirchenbauer/homoglyph_data/__init__.py": "efad6f657b194d3430f64fa43b58fc5dfc1c684f100c22b34a4e25c110ad055c",
+  "watermarking/kirchenbauer/homoglyphs.py": "6a05ba00792f6bec6b648d347494204f06d6a8ec80f3bc161d2a56d6ebdb592a",
+  "watermarking/kirchenbauer/normalizers.py": "bb08d4e6be7710bf13045805e37e5e56d1aef6cf2b4161f703495a3446c3f990",
+  "watermarking/kirchenbauer/watermark_processor.py": "b793c5075d2da1ef8bf52ad5c3d60c6c01408a932682ad02c6e8abf7142a4256",
+  "watermarking/transform/__init__.py": "4b7b4320ef229a9421ef2c218e1a97e82595029a8a929790e49b196c73146db9",
+  "watermarking/transform/key.py": "fa64113b6150b27df497180444087bbf04b0a68f84a52827182f310990c282bc",
+  "watermarking/transform/sampler.py": "be5fab37b34fed9d2adad452c6b95ebcd96c9c9158e61b7ab2c4b99560a276d7",
+  "watermarking/transform/score.py": "9750287d388121b01d85b1a878338050858e93ab98f2cb2e644cba86bd3bf8fd",
+  "watermarking/transform/transform_levenshtein.pyx": "26cbfa832b338b140d0f5fabc170b8de24f3a57430e7850707c3f7a9139059fc",
+  "4-seedbs.R": "72f81be9eaf7d0a1351fdcd599ddd26b05316ea7b5e1329c6d41104df1dc9392",
+  "4.1-seedbs.py": "41c34fbba2e5a7ae1067cdf2084cd8fd1d58198d4560376563308704c65af71f",
+  "5-not.R": "2d3b5d54c0cf0d3e143e52cd7fcb8a16db3e6ec3128949b46b49508c5a3b0325"
+}

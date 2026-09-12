@@ -1,0 +1,15 @@
+# Local Python 3.12 environment; retain the project's Transformers 4.x API.
+transformers==4.40.2
+torch==2.10.0
+accelerate==0.30.1
+datasets==2.19.1
+numpy==1.26.4
+scipy==1.13.0
+nltk==3.8.1
+sentencepiece==0.2.0
+sacremoses==0.0.53
+Cython==3.0.10
+setuptools==84.0.0
+openai==3.13.0
+pandas==3.0.5
+tqdm==4.70.1

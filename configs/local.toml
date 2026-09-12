@@ -1,0 +1,35 @@
+# Paths resolve relative to this config file, not the terminal working directory.
+# Replace with the directories on your server; no download is implicit.
+[experiment]
+name = "opt-gumbel-small"
+output_root = "../results"
+seed = 1
+threads = 1
+
+[generation]
+model_root = "../models"
+dataset_root = "../data"
+model = "facebook/opt-1.3b"
+device = "cpu" # On AutoDL explicitly change to "cuda" after checking the GPU.
+dataset_source = "local"
+method = "gumbel"
+number_of_experiments = 1
+batch_size = 1
+prompt_tokens = 50
+tokens_count = 64
+buffer_tokens = 20
+watermark_key_length = 1000
+truncate_vocab = 8
+max_scan_examples = 100000
+
+[detection]
+rolling_window_size = 20
+permutation_count = 999
+gamma = 0.4
+
+[segmentation]
+backend = "r" # Original R implementation; Rscript must be installed.
+minimum_length = 20
+permutation_count = 999
+block_size = 10
+threshold = 0.01
