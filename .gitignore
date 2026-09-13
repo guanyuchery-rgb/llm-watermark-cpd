@@ -167,4 +167,7 @@ mllm-seedbs-commands.sh
 3-detect-commands.sh
 4-seedbs-commands.sh
 results/
+models/
+data/
+configs/*.local.toml
 *.tar.gz

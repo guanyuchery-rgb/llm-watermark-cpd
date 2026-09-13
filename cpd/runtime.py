@@ -41,7 +41,7 @@ def source_files():
             if path.suffix in ('.py', '.pyx', '.sh', '.R', '.json'):
                 files.add(path)
     files.update(ROOT/name for name in ('1-setup.py', '2-textgen.py', '3-detect.py',
-                                      '4.1-seedbs.py', '4-seedbs.R', '5-not.R', 'requirements.txt',
+                                      '4.1-seedbs.py', '4-seedbs.R', '5-not.R', 'requirements.txt', 'requirements-common.txt',
                                       'requirements-macos-py312.lock'))
     return sorted(files)
 

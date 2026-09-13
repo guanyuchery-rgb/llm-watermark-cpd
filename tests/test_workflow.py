@@ -49,16 +49,30 @@ class WorkflowTests(unittest.TestCase):
 
     def test_bash_baseline_single_and_multiple(self):
         # Entire CSV contents must match the saved pre-refactor fixture on this CPU environment.
+        from transformers import AutoTokenizer
+        tokenizer = AutoTokenizer.from_pretrained(self.root/'models/local/tiny-gpt2/tokenizer', local_files_only=True)
+        texts = json.loads((self.root/'fixture.json').read_text())['texts']
         for count in (1, 3):
             output = self.root/f'baseline-{count}'
             command = self.bash_command(count, output)
             self.command(command, cwd=self.root)  # Works outside the repository too.
+            tables = {}
             for suffix, expected in self.baseline['runs'][str(count)].items():
                 with (output/f'smoke-{suffix}.csv').open(newline='') as stream:
                     actual = [[int(value) for value in row] for row in csv.reader(stream)]
+                tables[suffix] = actual
                 self.assertEqual([len(row) for row in actual], [len(row) for row in expected], suffix)
                 if platform.system() == 'Darwin' and platform.machine() == 'arm64':
                     self.assertEqual(actual, expected, suffix)
+            self.assertTrue(all(0 <= value < 2**32 for value in tables['seeds'][0]))
+            for index in range(count):
+                self.assertEqual(tables['prompt'][index], tokenizer.encode(texts[index])[-114:-64])
+                before_tokens = tables['tokens-before-attack'][index]
+                self.assertTrue(all(0 <= value < 24 for value in before_tokens))
+                encoded = tokenizer.encode(tokenizer.decode(before_tokens, skip_special_tokens=True),
+                                           truncation=True, max_length=2048)
+                expected = [0]*(64-len(encoded))+encoded if len(encoded) < 65 else encoded[1:65]
+                self.assertEqual(tables['attacked-tokens'][index], expected)
             before = (output/'smoke-seeds.csv').read_bytes()
             error = self.command(command, success=False)
             self.assertIn('Refusing to overwrite', error.stderr)
@@ -191,6 +205,49 @@ class WorkflowTests(unittest.TestCase):
         with patch('shutil.which', return_value=None):
             with self.assertRaisesRegex(ValueError, 'requires Rscript'):
                 preflight(config, ['generate', 'detect', 'segment'], self.root/'r-missing/sample')
+
+    def test_offline_synthetic_data_preparation(self):
+        from scripts.prepare_autodl import synthetic_dataset, model_inputs
+        from cpd.config import load_config
+        from datasets import load_from_disk
+        from unittest.mock import patch
+        config = load_config(self.root/'smoke.toml')
+        config['generation']['dataset_root'] = str(self.root/'synthetic-prepared')
+        with patch('huggingface_hub.snapshot_download', side_effect=AssertionError('Network forbidden')):
+            synthetic_dataset(config)
+        path = Path(config['generation']['dataset_root'])/'allenai/c4/realnewslike/train'
+        dataset = load_from_disk(str(path))
+        self.assertEqual(len(dataset), 3)
+        self.assertEqual(dataset.column_names, ['text'])
+        manifest = json.loads((path/'preparation.json').read_text())
+        self.assertIn('not C4', manifest['purpose'])
+        self.assertTrue(all(length >= 114 for length in manifest['encoded_lengths']))
+        self.assertEqual(manifest['text_sha256'], [hashlib.sha256(row['text'].encode()).hexdigest() for row in dataset])
+        with self.assertRaises(FileExistsError):
+            synthetic_dataset(config)
+        config['generation']['model'] = 'facebook/opt-1.3b'
+        with patch('huggingface_hub.snapshot_download', side_effect=AssertionError('Network forbidden')):
+            with self.assertRaisesRegex(ValueError, '40-character'):
+                model_inputs(config, 'main', self.root/'unused-cache')
+
+    def test_generate_check_skips_r_and_weights_and_reports_missing_cuda(self):
+        import contextlib
+        import io
+        from unittest.mock import patch
+        from cpd.__main__ import main
+        config = self.root/'generation-check.toml'
+        base = (self.root/'smoke.toml').read_text().replace('backend = "python"', 'backend = "r"')
+        for device, expected in [('cpu', 0), ('cuda', 2)]:
+            config.write_text(base.replace('device = "cpu"', f'device = "{device}"'))
+            output = io.StringIO()
+            with patch.object(sys, 'argv', ['cpd', 'check', '--config', str(config), '--stage', 'generate']), \
+                 patch('shutil.which', return_value=None), \
+                 patch('torch.cuda.is_available', return_value=False), \
+                 patch('transformers.AutoModelForCausalLM.from_pretrained', side_effect=AssertionError('Must not load weights')), \
+                 contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+                self.assertEqual(main(), expected)
+            if device == 'cuda':
+                self.assertIn('CUDA is unavailable', output.getvalue())
 
     def test_not_selects_shortest_and_discards_overlapping_intervals(self):
         from cpd.segmentation import select_not

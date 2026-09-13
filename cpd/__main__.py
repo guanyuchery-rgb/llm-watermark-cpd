@@ -24,6 +24,9 @@ def main():
             import watermarking.gumbel.gumbel_levenshtein
             import watermarking.transform.transform_levenshtein
             import transformers, datasets, accelerate
+            import torch
+            if 'generate' in stages and config['generation']['device'] == 'cuda' and not torch.cuda.is_available():
+                raise ValueError('device=cuda was requested but CUDA is unavailable; check the driver and Torch build.')
             print(f'Preflight passed: vocab_size={vocab}. Model weights were not loaded.')
             print('Usable text count is checked before model loading during generation.')
         else:

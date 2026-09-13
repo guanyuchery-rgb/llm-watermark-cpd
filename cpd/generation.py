@@ -10,10 +10,10 @@ def build_parser():
     parser.add_argument('--save', default="", type=str)
     parser.add_argument('--output_dir', default="results", type=str,
                         help="Output directory used only when --save is omitted.")
-    parser.add_argument('--model_root', '--model-root', default="/scratch/user/anthony.li/models", type=str,
-                        help="Root directory that contains model folders. Default preserves the original cluster layout.")
-    parser.add_argument('--dataset_root', '--dataset-root', default="/scratch/user/anthony.li/datasets", type=str,
-                        help="Root directory that contains the dataset folders. Default preserves the original cluster layout.")
+    parser.add_argument('--model_root', '--model-root', default="models", type=str,
+                        help="Model root; relative CLI paths resolve from the working directory.")
+    parser.add_argument('--dataset_root', '--dataset-root', default="data", type=str,
+                        help="Dataset root; relative CLI paths resolve from the working directory.")
     parser.add_argument('--model', default="facebook/opt-1.3b", type=str)
     parser.add_argument('--method', default="transform", type=str)
     parser.add_argument('--watermark_key_length', default=256, type=int)
@@ -141,7 +141,7 @@ def run(args):
         raise ValueError(f"truncate_vocab must be in [0, {vocab_size}); got {args.truncate_vocab}.")
     eff_vocab_size = vocab_size - args.truncate_vocab
     print(f"Prepared {len(prompts)} prompts from {scanned} records; "
-          f"model device={model.device}, vocab_size={vocab_size}", flush=True)
+          f"model device={model.device}, dtype={model.dtype}, vocab_size={vocab_size}", flush=True)
 
 
     def corrupt(tokens):

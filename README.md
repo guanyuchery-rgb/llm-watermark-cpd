@@ -6,6 +6,8 @@ Implementation of the methods described in "Segmenting Watermarked Texts From La
 [![OpenReview](https://img.shields.io/badge/OpenReview-Segmenting%20Watermarked%20Texts%20From%20Language%20Models-8c1b13.svg)](https://openreview.net/forum?id=FAuFpGeLmx)
 [![doi](https://img.shields.io/badge/doi-10.48550/arXiv.2410.20670-b31b1b.svg)](https://doi.org/10.48550/arXiv.2410.20670)
 
+首次上服务器请按 [AutoDL 首次运行手册](docs/autodl-first-run.md) 操作；该手册区分本地已验证与服务器待验证，并提供独立 Torch 构建安装及显式输入准备命令。
+
 ## 本地工程入口
 
 这份仓库现在提供不依赖 Slurm 的 **生成 → 滚动检测 → SeedBS → NOT 选择** 小流程。
@@ -25,7 +27,7 @@ uv pip check --python .venv/bin/python
 ```
 
 编译需要 C 编译器及系统开发工具。必须在目标操作系统与 Python 环境内重新编译，不能把 Mac 的 `.so` 复制到 Linux。
-`requirements.txt` 固定直接依赖；`requirements-macos-py312.lock` 记录本机全部依赖。
+`requirements.txt` 是 Mac 便捷入口，引用通用依赖并选择 Torch 2.10.0；`requirements-common.txt` 不选择 Torch 构建，供 Linux 先单独安装 Torch 后配合精确约束使用。`requirements-macos-py312.lock` 只记录 Mac 全部依赖。
 Linux/CUDA 的 Torch 平台依赖仍需在目标服务器验证，每次运行也会保存实际版本。
 
 ### 2. 先跑完全离线的小样例
@@ -60,7 +62,7 @@ python -m unittest discover -s tests -v
 ```
 
 测试包含必须经过 Bash 启动的单样本和三样本生成，参数为 `50/64/20`、key 长度 1000。
-macOS arm64 会与重构前 CSV 完整对比；跨平台只要求形状和流程检查，不声称浮点结果逐位相同。
+macOS arm64 会与重构前 CSV 完整对比；跨平台要求形状、整数范围、prompt 与后处理内容及流程检查，不声称浮点结果逐位相同。
 
 ### 3. 准备真实实验
 
@@ -82,7 +84,7 @@ model_root/<model>/tokenizer/      # 匹配的 tokenizer.save_pretrained
 先检查，再只运行生成；AutoDL 使用时显式设置 `device = "cuda"`：
 
 ```bash
-python -m cpd check --config configs/local.toml
+python -m cpd check --config configs/local.toml --stage generate
 python -m cpd run --config configs/local.toml --stage generate
 ```
 
@@ -119,7 +121,7 @@ run/
 └── segment/                    # SeedBS / NOT CSV、run.log、runtime.json
 ```
 
-默认拒绝同名文件。生成前先检查参数、路径、可用文本数量及模型上下文长度；`check` 不加载模型权重，文本可用性在实际生成前检查。
+默认拒绝同名文件。独立生成 CLI 的 model_root/dataset_root 默认分别为当前目录下的 `models`/`data`，不再使用作者的集群绝对路径。生成前先检查参数、路径、可用文本数量及模型上下文长度；`check` 不加载模型权重，文本可用性在实际生成前检查。
 首次运行需要读取输入文件计算 SHA256，大模型/数据会花时间，这是保存输入身份的一部分。
 参数错误返回非零退出码；阶段失败会保存完整 traceback，并停止后续阶段。Ctrl-C 会停止子进程并记录中断。
 断电或强制 kill 后可能留下 `.running` 锁；核对文件里的 PID 已不存在后才手动移除。
